@@ -2,12 +2,25 @@
 import InscriptionPartenair from "@/app/Form/InscriptionPartenair";
 import InscriptionPersonnel from "@/app/Form/InscriptionPersonnel";
 import InscriptionTaxi from "@/app/Form/InscriptionTaxi";
-import React, { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 
 export default function Inscription() {
   const [accountType, setAccountType] = useState<'personal' | 'business'>('personal');
   const [roleType, setRoleType] = useState<'driver' | 'partner'>('driver');
-
+  const searchParams = useSearchParams();
+  const type = searchParams.get('type');
+  useEffect(() => {
+    if (type === 'personnel') {
+      setAccountType('personal');
+    } else if (type === 'chauffeur') {
+      setAccountType('business');
+      setRoleType('driver');
+    } else if (type === 'partenaire') {
+      setAccountType('business');
+      setRoleType('partner');
+    }
+  }, [type]);
   return (
     <main className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">

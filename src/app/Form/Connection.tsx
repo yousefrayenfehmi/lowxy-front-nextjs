@@ -1,7 +1,10 @@
 'use client'
 import React, { useState } from "react";
-
+import { useRouter } from "next/navigation";
+import ConnectionApi from "../Api/AuthApi/Connection";
+import { setUserType } from "../utils/auth";
 export default function ConnectionForm({type}: {type: 'personnel' | 'chauffeur' | 'partenaire'}) {
+  const router = useRouter();
   const [user, setUser] = useState({
     email: '',
     password: ''
@@ -10,10 +13,20 @@ export default function ConnectionForm({type}: {type: 'personnel' | 'chauffeur' 
     const { name, value } = e.target;
     setUser({ ...user, [name]: value });
   };
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {   
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {   
     e.preventDefault();
     console.log(type);
     console.log(user);
+    const response = await ConnectionApi(user.email, user.password, type);
+    localStorage.setItem('token', response.token);
+    console.log(response);
+    if(response.success){
+      // Notifier le changement d'utilisateur pour mettre à jour le header
+      setUserType(type);
+      router.push('/Profile');
+    }else{
+      alert('Email ou mot de passe incorrect');
+    }
   };
   return (
     <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -70,7 +83,7 @@ export default function ConnectionForm({type}: {type: 'personnel' | 'chauffeur' 
       </div>
 
       <div className="text-sm">
-        <a href="#" className="font-medium text-purple-600 hover:text-purple-500 underline">
+        <a onClick={() => router.push('/Auth/mot_passe_oblier?type=' + type)} className="font-medium text-purple-600 hover:text-purple-500 underline">
           Mot de passe oublié ?
         </a>
       </div>
@@ -78,7 +91,7 @@ export default function ConnectionForm({type}: {type: 'personnel' | 'chauffeur' 
 
     {/* Submit Button */}
     <div>
-      <button
+      <button 
         type="submit"
         className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-lg font-medium rounded-lg text-white bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
       >

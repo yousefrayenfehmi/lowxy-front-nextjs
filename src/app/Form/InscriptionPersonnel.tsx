@@ -1,14 +1,19 @@
 'use client';
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import PersonnelApi from "../Api/AuthApi/PersonnelApi";
 
 export default function InscriptionPersonnel() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-    registrationNumber: ''
+    info:{
+      nom_complet: '',
+      email: '',
+      telephone: '',
+      motdepasse: '',
+      confirmPassword: '',
+      matricule_taxi: ''
+    }
   });
 
   const [error, setError] = useState('');
@@ -16,15 +21,18 @@ export default function InscriptionPersonnel() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
-    // Met à jour les données du formulaire
+    // Met à jour les données du formulaire dans l'objet info
     setFormData({
       ...formData,
-      [name]: value
+      info: {
+        ...formData.info,
+        [name]: value
+      }
     });
 
     // Validation spécifique pour la confirmation du mot de passe
     if (name === 'confirmPassword') {
-      if (value !== formData.password) {
+      if (value !== formData.info.motdepasse) {
         setError('Les mots de passe ne correspondent pas');
       } else {
         setError(''); // Efface l'erreur si les mots de passe correspondent
@@ -37,15 +45,26 @@ export default function InscriptionPersonnel() {
       const motDePasseValide = verifierPassword(value);
       
       // Ensuite vérifier la correspondance avec la confirmation
-      if (motDePasseValide && formData.confirmPassword && value !== formData.confirmPassword) {
+      if (motDePasseValide && formData.info.confirmPassword && value !== formData.info.confirmPassword) {
         setError('Les mots de passe ne correspondent pas');
       }
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Données du formulaire:', formData);
+    try {
+      // Envoie l'objet complet avec la structure attendue par le backend
+      const personnel = await PersonnelApi(formData);
+      localStorage.setItem('token', personnel.token);
+      // Débugger et essayer la navigation
+      console.log('Tentative de navigation vers /Auth/CodeConfirmation');
+      router.push('/Auth/CodeConfirmation?type=personnel');
+      console.log('Navigation déclenchée');
+    } catch (error) {
+      console.error('Erreur lors de l\'inscription:', error);
+      setError('Erreur lors de l\'inscription. Veuillez réessayer.');
+    }
   };
 
   const verifierPassword = (password: string) => {
@@ -98,11 +117,11 @@ export default function InscriptionPersonnel() {
             {/* Nom Complet */}
             <div>
               <input
-                id="fullName"
-                name="fullName"
+                id="nom_complet"
+                name="nom_complet"
                 type="text"
                 required
-                value={formData.fullName}
+                value={formData.info.nom_complet}
                 onChange={handleChange}
                 className="appearance-none rounded-xl relative block w-full px-4 py-4 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors bg-white"
                 placeholder="Nom Complet"
@@ -117,7 +136,7 @@ export default function InscriptionPersonnel() {
                 type="email"
                 autoComplete="email"
                 required
-                value={formData.email}
+                value={formData.info.email}
                 onChange={handleChange}
                 className="appearance-none rounded-xl relative block w-full px-4 py-4 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors bg-white"
                 placeholder="Adresse Email"
@@ -127,12 +146,12 @@ export default function InscriptionPersonnel() {
             {/* Numéro de Téléphone */}
             <div>
               <input
-                id="phone"
-                name="phone"
+                id="telephone"
+                name="telephone"
                 type="tel"
                 autoComplete="tel"
                 required
-                value={formData.phone}
+                value={formData.info.telephone}
                 onChange={handleChange}
                 className="appearance-none rounded-xl relative block w-full px-4 py-4 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors bg-white"
                 placeholder="Numéro de Téléphone"
@@ -142,12 +161,12 @@ export default function InscriptionPersonnel() {
             {/* Mot de Passe */}
             <div>
               <input
-                id="password"
-                name="password"
+                id="motdepasse"
+                name="motdepasse"
                 type="password"
                 autoComplete="new-password"
                 required
-                value={formData.password}
+                value={formData.info.motdepasse}
                 onChange={handleChange}
                 className="appearance-none rounded-xl relative block w-full px-4 py-4 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors bg-white"
                 placeholder="Mot de Passe"
@@ -162,7 +181,7 @@ export default function InscriptionPersonnel() {
                 type="password"
                 autoComplete="new-password"
                 required
-                value={formData.confirmPassword}
+                value={formData.info.confirmPassword}
                 onChange={handleChange}
                 className="appearance-none rounded-xl relative block w-full px-4 py-4 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors bg-white"
                 placeholder="Confirmer Mot de Passe"
@@ -173,10 +192,10 @@ export default function InscriptionPersonnel() {
             {/* Numéro d'Inscription */}
             <div>
               <input
-                id="registrationNumber"
-                name="registrationNumber"
+                id="matricule_taxi"
+                name="matricule_taxi"
                 type="text"
-                value={formData.registrationNumber}
+                value={formData.info.matricule_taxi}
                 onChange={handleChange}
                 className="appearance-none rounded-xl relative block w-full px-4 py-4 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors bg-white"
                 placeholder="Numéro d'Inscription"

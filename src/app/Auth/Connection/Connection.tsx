@@ -1,8 +1,25 @@
 'use client';
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ConnectionForm from "../../Form/Connection";
+import { useSearchParams } from "next/navigation";
 export default function Connection() {
   const [accountType, setAccountType] = useState<'personnel' | 'chauffeur' | 'partenaire'>('personnel');
+  const searchParams = useSearchParams();
+  const type = searchParams.get('type');
+  useEffect(() => {
+    console.log('Type depuis URL:', type);
+    
+    if (type === 'personnel') {
+      setAccountType('personnel');
+    } else if (type === 'chauffeur') {
+      setAccountType('chauffeur');
+    } else if (type === 'partenaire') {
+      setAccountType('partenaire');
+    } else {
+      // Si pas de type ou type null, garder 'personnel' par défaut
+      setAccountType('personnel');
+    }
+  }, [type]);
 
   return (
     <main className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">

@@ -1,30 +1,65 @@
 'use client';
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { PartnerApi } from "../Api/AuthApi/PartnerApi";
 
 export default function InscriptionPartenair() {
-  const [formData, setFormData] = useState({
-    companyName: '',
-    ownerName: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: ''
-  });
+  const router = useRouter();
+  const [formData, setFormData] = useState(
+    {inforamtion:{
+              inforegester: {
+                nom_entreprise: '',
+                Proprietaire: '',
+                email: '',
+                telephone: '',
+                motdepasse: '',
+                confirmPassword: ''
+              }
+  }});
 
   const [error, setError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
-    // Met à jour les données du formulaire
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    // Gère les noms de champs imbriqués
+    if (name.startsWith('inforamtion.inforegester.')) {
+      const fieldName = name.replace('inforamtion.inforegester.', '');
+      setFormData({
+        ...formData,
+        inforamtion: {
+          ...formData.inforamtion,
+          inforegester: {
+            ...formData.inforamtion.inforegester,
+            [fieldName]: value
+          }
+        }
+      });
+    } else if (name.startsWith('inforegester.')) {
+      const fieldName = name.replace('inforegester.', '');
+      setFormData({
+        ...formData,
+        inforamtion: {
+          ...formData.inforamtion,
+          inforegester: {
+            ...formData.inforamtion.inforegester,
+            [fieldName]: value
+          }
+        }
+      });
+    } else {
+      setFormData({
+        ...formData,
+        inforamtion: {
+          ...formData.inforamtion,
+          [name]: value
+        }
+      });
+    }
 
     // Validation spécifique pour la confirmation du mot de passe
-    if (name === 'confirmPassword') {
-      if (value !== formData.password) {
+    if (name.endsWith('confirmPassword')) {
+      if (value !== formData.inforamtion.inforegester.motdepasse) {
         setError('Les mots de passe ne correspondent pas');
       } else {
         setError(''); // Efface l'erreur si les mots de passe correspondent
@@ -32,20 +67,37 @@ export default function InscriptionPartenair() {
     }
 
     // Validation quand on change le mot de passe principal
-    if (name === 'password') {
+    if (name.endsWith('motdepasse')) {
       // D'abord vérifier la force du mot de passe
       const motDePasseValide = verifierPassword(value);
       
       // Ensuite vérifier la correspondance avec la confirmation
-      if (motDePasseValide && formData.confirmPassword && value !== formData.confirmPassword) {
+      if (motDePasseValide && formData.inforamtion.inforegester.confirmPassword && value !== formData.inforamtion.inforegester.confirmPassword) {
         setError('Les mots de passe ne correspondent pas');
       }
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Données du formulaire partenaire:', formData);
+    try {
+      // Créer l'objet final sans confirmPassword
+      const { confirmPassword, ...inforegesterData } = formData.inforamtion.inforegester;
+      const finalData = {
+        inforamtion: {
+          inforegester: inforegesterData
+        }
+      };
+      
+      console.log('Données du formulaire partenaire:', finalData);
+      // Appeler l'API partenaire
+      const partner = await PartnerApi(finalData);
+      localStorage.setItem('token', partner.token);
+      router.push('/Auth/CodeConfirmation?type=partenaire');
+    } catch (error) {
+      console.error('Erreur lors de l\'inscription:', error);
+      setError('Erreur lors de l\'inscription. Veuillez réessayer.');
+    }
   };
 
   const verifierPassword = (password: string) => {
@@ -98,11 +150,11 @@ export default function InscriptionPartenair() {
             {/* Nom de l'Entreprise */}
             <div>
               <input
-                id="companyName"
-                name="companyName"
+                id="inforamtion.inforegester.nom_entreprise"
+                name="inforamtion.inforegester.nom_entreprise"
                 type="text"
                 required
-                value={formData.companyName}
+                value={formData.inforamtion.inforegester.nom_entreprise}
                 onChange={handleChange}
                 className="appearance-none rounded-xl relative block w-full px-4 py-4 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors bg-white"
                 placeholder="Nom de l'Entreprise"
@@ -112,11 +164,11 @@ export default function InscriptionPartenair() {
             {/* Nom du Propriétaire */}
             <div>
               <input
-                id="ownerName"
-                name="ownerName"
+                id="inforegester.Proprietaire"
+                name="inforegester.Proprietaire"
                 type="text"
                 required
-                value={formData.ownerName}
+                value={formData.inforamtion.inforegester.Proprietaire}
                 onChange={handleChange}
                 className="appearance-none rounded-xl relative block w-full px-4 py-4 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors bg-white"
                 placeholder="Nom du Propriétaire"
@@ -126,12 +178,12 @@ export default function InscriptionPartenair() {
             {/* Adresse Email */}
             <div>
               <input
-                id="email"
-                name="email"
+                id="inforegester.email"
+                name="inforegester.email"
                 type="email"
                 autoComplete="email"
                 required
-                value={formData.email}
+                value={formData.inforamtion.inforegester.email}
                 onChange={handleChange}
                 className="appearance-none rounded-xl relative block w-full px-4 py-4 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors bg-white"
                 placeholder="Adresse Email"
@@ -141,12 +193,12 @@ export default function InscriptionPartenair() {
             {/* Numéro de Téléphone */}
             <div>
               <input
-                id="phone"
-                name="phone"
+                id="inforegester.telephone"
+                name="inforegester.telephone"
                 type="tel"
                 autoComplete="tel"
                 required
-                value={formData.phone}
+                value={formData.inforamtion.inforegester.telephone}
                 onChange={handleChange}
                 className="appearance-none rounded-xl relative block w-full px-4 py-4 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors bg-white"
                 placeholder="Numéro de Téléphone"
@@ -156,12 +208,12 @@ export default function InscriptionPartenair() {
             {/* Mot de Passe */}
             <div>
               <input
-                id="password"
-                name="password"
+                id="inforegester.motdepasse"
+                name="inforegester.motdepasse"
                 type="password"
                 autoComplete="new-password"
                 required
-                value={formData.password}
+                value={formData.inforamtion.inforegester.motdepasse}
                 onChange={handleChange}
                 className="appearance-none rounded-xl relative block w-full px-4 py-4 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors bg-white"
                 placeholder="Mot de Passe"
@@ -171,12 +223,12 @@ export default function InscriptionPartenair() {
             {/* Confirmer Mot de Passe */}
             <div>
               <input
-                id="confirmPassword"
-                name="confirmPassword"
+                id="inforegester.confirmPassword"
+                name="inforegester.confirmPassword"
                 type="password"
                 autoComplete="new-password"
                 required
-                value={formData.confirmPassword}
+                value={formData.inforamtion.inforegester.confirmPassword}
                 onChange={handleChange}
                 className={`appearance-none rounded-xl relative block w-full px-4 py-4 border placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 transition-colors bg-white ${
                   error ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-purple-500 focus:border-purple-500'
