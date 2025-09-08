@@ -5,7 +5,7 @@ import axios from 'axios'
 
 export const createCoveringAd = async (data: any) => {
     const token = localStorage.getItem('token')
-    const response = await axios.post('http://localhost:5000/save', data, {
+    const response = await axios.post('/api/save', data, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -15,7 +15,7 @@ export const createCoveringAd = async (data: any) => {
 
 export const getUserCoverings = async () => {
     const token = localStorage.getItem('token')
-    const response = await axios.get('http://localhost:5000/creator-campaigns', {
+    const response = await axios.get('/api/creator-campaigns', {
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -26,7 +26,7 @@ export const getUserCoverings = async () => {
 // Campagnes disponibles pour les chauffeurs
 export const getAvailableCoverings = async () => {
     const token = localStorage.getItem('token')
-    const response = await axios.get('http://localhost:5000/available', {
+    const response = await axios.get('/api/available', {
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -37,7 +37,7 @@ export const getAvailableCoverings = async () => {
 // Assigner le taxi connecté à une campagne
 export const assignTaxiToCovering = async (coveringId: string) => {
     const token = localStorage.getItem('token')
-    const response = await axios.post(`http://localhost:5000/join/${coveringId}`, {}, {
+    const response = await axios.post(`/api/join/${coveringId}`, {}, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -48,7 +48,7 @@ export const assignTaxiToCovering = async (coveringId: string) => {
 // Campagnes déjà assignées au taxi connecté
 export const getAssignedCoverings = async () => {
     const token = localStorage.getItem('token')
-    const response = await axios.get('http://localhost:5000/my-campaigns', {
+    const response = await axios.get('/api/my-campaigns', {
         headers: {
             'Authorization': `Bearer ${token}`
         }

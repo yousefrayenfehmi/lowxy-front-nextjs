@@ -6,11 +6,11 @@ export default async function ForgotPasswordApi(email: string, type: string) {
     try {
         console.log('Envoi demande de réinitialisation pour:', email);
         if(type === 'personnel'){
-             response = await axios.post('http://localhost:5000/touriste/forgetpassword', {email});
+             response = await axios.post('/api/touriste/forgetpassword', {email});
         }else if(type === 'chauffeur'){
-             response = await axios.post('http://localhost:5000/chauffeur/forgetpassword', {email});
+             response = await axios.post('/api/chauffeur/forgetpassword', {email});
         }else if(type === 'partenaire'){
-             response = await axios.post('http://localhost:5000/partenaire/forgetpassword', {email});
+             response = await axios.post('/api/partenaire/forgetpassword', {email});
         }
         return response?.data;
     } catch (error) {
@@ -26,15 +26,15 @@ export async function ResetPasswordApi(token: string, newPassword: string, type:
         console.log('Réinitialisation du mot de passe avec token');
         
         if(type === 'personnel'){
-            response = await axios.post(`http://localhost:5000/touriste/resetpassword/${token}`, {
+            response = await axios.post(`/api/touriste/resetpassword/${token}`, {
                 newPassword: newPassword
             });
         }else if(type === 'chauffeur'){
-            response = await axios.post(`http://localhost:5000/chauffeur/resetpassword/${token}`, {
+            response = await axios.post(`/api/chauffeur/resetpassword/${token}`, {
                 newPassword: newPassword
             });
         }else if(type === 'partenaire'){
-            response = await axios.post(`http://localhost:5000/partenaire/resetpassword/${token}`, {
+            response = await axios.post(`/api/partenaire/resetpassword/${token}`, {
                 newPassword: newPassword
             });
         }

@@ -6,7 +6,7 @@ export async function CodeConfirmationApi(code: any, type: string) {
         if (type === 'personnel') {
             const token = localStorage.getItem('tokenPersonnel');
 
-            const response = await axios.post('http://localhost:5000/touriste-verifier-email',code, {
+            const response = await axios.post('/api/touriste-verifier-email',code, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -15,7 +15,7 @@ export async function CodeConfirmationApi(code: any, type: string) {
         } else if (type === 'chauffeur') {
             const token = localStorage.getItem('tokenTaxi');
             console.log(token);
-            const response = await axios.post('http://localhost:5000/chauffeur-verifier-email',code, {
+            const response = await axios.post('/api/chauffeur-verifier-email',code, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -24,7 +24,7 @@ export async function CodeConfirmationApi(code: any, type: string) {
         } else if (type === 'partenaire') {
             const token = localStorage.getItem('tokenPartner');
 
-            const response = await axios.post('http://localhost:5000/partenaire-verifier-email',code, {
+            const response = await axios.post('/api/partenaire-verifier-email',code, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -40,21 +40,21 @@ export async function ResendCodeApi(type: string) {
     try {
         if (type === 'personnel') { 
         const token = localStorage.getItem('tokenPersonnel');
-        const response = await axios.get('http://localhost:5000/touriste-reenvoyercode', {
+        const response = await axios.get('/api/touriste-reenvoyercode', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
         } else if (type === 'chauffeur') {
             const token = localStorage.getItem('tokenTaxi');
-            const response = await axios.get('http://localhost:5000/chauffeur-reenvoyercode', {
+            const response = await axios.get('/api/chauffeur-reenvoyercode', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
         } else if (type === 'partenaire') {
             const token = localStorage.getItem('tokenPartner');
-            const response = await axios.get('http://localhost:5000/partenaire-reenvoyercode', {
+            const response = await axios.get('/api/partenaire-reenvoyercode', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }

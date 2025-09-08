@@ -5,7 +5,7 @@ export default async function PersonnelApi(data: any) {
     try {
         console.log(data);
         
-        const response = await axios.post('http://localhost:5000/touriste/register', data);
+        const response = await axios.post('/api/touriste/register', data);
         return response.data;
     } catch (error) {
         console.error('Erreur lors de l\'inscription:', error);
@@ -14,7 +14,7 @@ export default async function PersonnelApi(data: any) {
 }
 
 export  async function recupererProfile() {
-    const response = await axios.get('http://localhost:5000/touriste-by-token', {
+    const response = await axios.get('/api/touriste-by-token', {
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('tokenpersonnel')}`
         }
@@ -23,7 +23,7 @@ export  async function recupererProfile() {
 }
 
 export async function modifierProfile(profileData: any) {
-    const response = await axios.post('http://localhost:5000/completertouriste', profileData, {
+    const response = await axios.post('/api/completertouriste', profileData, {
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('tokenpersonnel')}`
         }
