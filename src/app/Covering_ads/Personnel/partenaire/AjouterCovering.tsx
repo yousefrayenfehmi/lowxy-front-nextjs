@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation'
 import { createCoveringAd } from '../../../Api/AuthApi/CoveringApi'
 
 interface CoveringAd {
-  type_covering: 'partiel' | 'total' | 'toit' | 'lateral' | 'arriere'
-  type_voiture: 'berline' | 'suv' | 'utilitaire' | 'break' | 'monospace'
+  type_covering: 'partiel' | 'semi-total' | 'total'
+  type_voiture: 'berline' | 'van_suv'
   nombre_jours: number
   nombre_taxi: number
   lien_photo: string
@@ -14,20 +14,28 @@ interface CoveringAd {
 }
 
 const TYPES_COVERING = [
-  { value: 'partiel', label: 'Covering Partiel', icon: '🚖', description: 'Covering sur une partie du véhicule' },
-  { value: 'total', label: 'Covering Total', icon: '🚕', description: 'Covering complet du véhicule' },
-  { value: 'toit', label: 'Toit uniquement', icon: '🔝', description: 'Covering sur le toit du véhicule' },
-  { value: 'lateral', label: 'Latéral', icon: '↔️', description: 'Covering sur les côtés du véhicule' },
-  { value: 'arriere', label: 'Arrière', icon: '🔙', description: 'Covering sur l\'arrière du véhicule' }
+  { value: 'partiel', label: 'Partiel', icon: '🧩', description: 'Covering partiel du véhicule' },
+  { value: 'semi-total', label: 'Semi-total', icon: '🧱', description: 'Covering semi-total du véhicule' },
+  { value: 'total', label: 'Total', icon: '🚕', description: 'Covering complet du véhicule' }
 ]
 
 const TYPES_VOITURE = [
   { value: 'berline', label: 'Berline', icon: '🚗' },
-  { value: 'suv', label: 'SUV', icon: '🚙' },
-  { value: 'utilitaire', label: 'Utilitaire', icon: '🚐' },
-  { value: 'break', label: 'Break', icon: '🚗' },
-  { value: 'monospace', label: 'Monospace', icon: '🚌' }
+  { value: 'van_suv', label: 'Van / SUV', icon: '🚐' }
 ]
+
+const PRICING: Record<'berline' | 'van_suv', Record<'partiel' | 'semi-total' | 'total', { jour: number; mois: number }>> = {
+  berline: {
+    'partiel': { jour: 50, mois: 360 },
+    'semi-total': { jour: 75, mois: 600 },
+    'total': { jour: 100, mois: 900 }
+  },
+  van_suv: {
+    'partiel': { jour: 70, mois: 500 },
+    'semi-total': { jour: 100, mois: 750 },
+    'total': { jour: 140, mois: 1200 }
+  }
+}
 
 
 
@@ -41,8 +49,23 @@ export default function AjouterCovering() {
     nombre_jours: 30,
     nombre_taxi: 1,
     lien_photo: '',
-    prix: 0
+    prix: 50
   })
+
+  const selectedVehicleKey = formData.type_voiture
+  const selectedCoveringKey = formData.type_covering
+  const priceJour = PRICING[selectedVehicleKey][selectedCoveringKey].jour
+  const priceMois = PRICING[selectedVehicleKey][selectedCoveringKey].mois
+  const totalEstime = priceJour * formData.nombre_jours * formData.nombre_taxi
+
+  // Mettre à jour le prix unitaire quand le type change
+  // (on stocke le prix/jour dans formData.prix pour l'API)
+  if (formData.prix !== priceJour) {
+    // Eviter une boucle: ne met à jour que si différent
+    setTimeout(() => {
+      setFormData(prev => ({ ...prev, prix: priceJour }))
+    }, 0)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -210,33 +233,41 @@ export default function AjouterCovering() {
 
 
               {/* Récapitulatif */}
-              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-200">
+              <div className="bg-white rounded-xl p-6 border border-indigo-300 shadow-lg">
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                   <span>📋</span> Récapitulatif
                 </h3>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Type covering:</span>
-                      <span className="font-semibold">{TYPES_COVERING.find(t => t.value === formData.type_covering)?.label}</span>
+                      <span className="text-gray-700">Type covering:</span>
+                      <span className="font-semibold text-gray-900">{TYPES_COVERING.find(t => t.value === formData.type_covering)?.label}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Type véhicule:</span>
-                      <span className="font-semibold">{TYPES_VOITURE.find(v => v.value === formData.type_voiture)?.label}</span>
+                      <span className="text-gray-700">Type véhicule:</span>
+                      <span className="font-semibold text-gray-900">{TYPES_VOITURE.find(v => v.value === formData.type_voiture)?.label}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-700">Tarif unitaire:</span>
+                      <span className="font-semibold text-indigo-700">{priceJour} €/jour → {priceMois} €/mois</span>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Nombre de jours:</span>
-                      <span className="font-semibold">{formData.nombre_jours} jour(s)</span>
+                      <span className="text-gray-700">Nombre de jours:</span>
+                      <span className="font-semibold text-gray-900">{formData.nombre_jours} jour(s)</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Nombre de taxis:</span>
-                      <span className="font-semibold">{formData.nombre_taxi} taxi(s)</span>
+                      <span className="text-gray-700">Nombre de taxis:</span>
+                      <span className="font-semibold text-gray-900">{formData.nombre_taxi} taxi(s)</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Lien photo:</span>
-                      <span className="font-semibold text-xs break-all">{formData.lien_photo || 'Non spécifié'}</span>
+                      <span className="text-gray-700">Lien photo:</span>
+                      <span className="font-semibold text-gray-900 text-xs break-all">{formData.lien_photo || 'Non spécifié'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-700">Total estimé (jours × taxis):</span>
+                      <span className="font-semibold text-indigo-700">{totalEstime} €</span>
                     </div>
                   </div>
                 </div>
