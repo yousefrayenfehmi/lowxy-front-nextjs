@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useRouter } from 'next/navigation'
 
 const steps = [
   { 
@@ -7,6 +8,7 @@ const steps = [
     title: "Quizz géolocaliser",
     subtitle: "Gagne ta course en répondant à temps",
     color: "bg-gradient-to-b from-pink-400 to-pink-500",
+    href: '/quizz',
     icon: <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
       <rect x="6" y="8" width="24" height="20" rx="4" fill="#fff" stroke="#ec4899" strokeWidth="2"/>
       <circle cx="18" cy="15" r="3" fill="#ec4899"/>
@@ -19,6 +21,7 @@ const steps = [
     title: "Blog de la ville",
     subtitle: "Découvre les dessous de ta ville",
     color: "bg-gradient-to-b from-blue-400 to-blue-500",
+    href: '/blog',
     icon: <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
       <rect x="8" y="6" width="20" height="24" rx="3" fill="#fff" stroke="#3b82f6" strokeWidth="2"/>
       <rect x="11" y="10" width="14" height="2" rx="1" fill="#3b82f6"/>
@@ -35,6 +38,7 @@ const steps = [
     title: "Billetteries & Tours",
     subtitle: "Meilleur attractions au meilleur prix",
     color: "bg-gradient-to-b from-green-400 to-green-500",
+    href: '/Tours',
     icon: <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
       <rect x="6" y="12" width="24" height="12" rx="3" fill="#fff" stroke="#22c55e" strokeWidth="2"/>
       <rect x="9" y="15" width="18" height="6" rx="2" fill="#dcfce7"/>
@@ -50,6 +54,7 @@ const steps = [
     title: "La guide touristique",
     subtitle: "Prépare tes trajet avec ce guide IA",
     color: "bg-gradient-to-b from-yellow-400 to-yellow-500",
+    href: '/docs',
     icon: <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
       <rect x="10" y="8" width="16" height="20" rx="8" fill="#fff" stroke="#eab308" strokeWidth="2"/>
       <rect x="12" y="12" width="12" height="8" rx="4" fill="#fef3c7"/>
@@ -68,6 +73,7 @@ const steps = [
     title: "La plus grande des petites annonces",
     subtitle: "A votre tour d'afficher",
     color: "bg-gradient-to-b from-purple-400 to-purple-500",
+    href: '/Covering_ads/Personnel/partenaire',
     icon: <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
       <rect x="6" y="10" width="18" height="16" rx="3" fill="#fff" stroke="#a855f7" strokeWidth="2"/>
       <rect x="9" y="13" width="12" height="10" rx="2" fill="#f3e8ff"/>
@@ -99,6 +105,7 @@ const flagImages = [
 
 
 export default function Accueil() {
+  const router = useRouter()
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-center bg-white overflow-hidden pt-16">
       {/* Drapeaux européens en SVG/PNG colorés */}
@@ -134,6 +141,7 @@ export default function Accueil() {
                 paddingLeft: '5px',
                 paddingRight: '5px'
               }}
+              onClick={() => step.href && router.push(step.href)}
             >
               {/* Texte centré avec espacement exact */}
               <div className="flex flex-col items-center justify-center text-center w-full">

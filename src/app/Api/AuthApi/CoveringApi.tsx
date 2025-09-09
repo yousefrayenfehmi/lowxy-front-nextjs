@@ -13,6 +13,28 @@ export const createCoveringAd = async (data: any) => {
     return response.data
 }
 
+// Stripe - créer une session de paiement pour une campagne de covering
+export const createCoveringCheckoutSession = async (data: any) => {
+    const token = localStorage.getItem('token')
+    const response = await axios.post('/api/create', data, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    return response.data
+}
+
+// Stripe - confirmer le paiement (si un flux de confirmation est nécessaire)
+export const confirmCoveringPayment = async (data: any) => {
+    const token = localStorage.getItem('token')
+    const response = await axios.post('/api/campaigns/confirm-payment', data, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    return response.data
+}
+
 export const getUserCoverings = async () => {
     const token = localStorage.getItem('token')
     const response = await axios.get('/api/creator-campaigns', {

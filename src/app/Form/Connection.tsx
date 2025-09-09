@@ -3,8 +3,10 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import ConnectionApi from "../Api/AuthApi/Connection";
 import { setUserType } from "../utils/auth";
+import { useMessage } from "../contexts/MessageContext";
 export default function ConnectionForm({type}: {type: 'personnel' | 'chauffeur' | 'partenaire'}) {
   const router = useRouter();
+  const { showMessage } = useMessage();
   const [user, setUser] = useState({
     email: '',
     password: ''
@@ -17,15 +19,23 @@ export default function ConnectionForm({type}: {type: 'personnel' | 'chauffeur' 
     e.preventDefault();
     console.log(type);
     console.log(user);
-    const response = await ConnectionApi(user.email, user.password, type);
-    localStorage.setItem('token', response.token);
-    console.log(response);
-    if(response.success){
-      // Notifier le changement d'utilisateur pour mettre à jour le header
-      setUserType(type);
-      router.push('/Profile');
-    }else{
-      alert('Email ou mot de passe incorrect');
+    try {
+      const response = await ConnectionApi(user.email, user.password, type);
+      console.log(response);
+      if (response?.token) {
+        localStorage.setItem('token', response.token);
+      }
+      if(response?.success){
+        // Notifier le changement d'utilisateur pour mettre à jour le header
+        setUserType(type);
+        router.push('/Profile');
+      } else {
+        showMessage('Email ou mot de passe incorrect', 'error');
+      }
+    } catch (err: any) {
+      console.error('Erreur de connexion', err);
+      const apiMsg = err?.response?.data?.message || err?.message;
+      showMessage(apiMsg ? `Erreur de connexion: ${apiMsg}` : 'Erreur de connexion. Veuillez réessayer.', 'error');
     }
   };
   return (

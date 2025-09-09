@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { loadStripe } from '@stripe/stripe-js'
+import { useMessage } from '@/app/contexts/MessageContext'
 import { useParams, useRouter } from 'next/navigation'
 import { createTourCheckoutSession, getTourById } from '../../../Api/AuthApi/ToursApi'
 
@@ -22,6 +23,7 @@ interface TourDetails {
 
 export default function ReserverTourPage() {
   const router = useRouter()
+  const { showMessage } = useMessage()
   const params = useParams<{ tourId: string }>()
   const tourId = params?.tourId
   const [loading, setLoading] = useState(true)
@@ -107,21 +109,21 @@ export default function ReserverTourPage() {
         
         const stripe = await loadStripe('pk_test_51S3OND3Y6eRVzgj578y5XjzRml1c0UkC1wj7lBWiSQzSyBR7xaGaGLwSPCr368ISueMPnuqLHNdsTXBNta9P2WnV00Q1IbZOwx')
         if (!stripe) {
-          alert('Stripe non initialisé. Veuillez réessayer.')
+          showMessage('Stripe non initialisé. Veuillez réessayer.', 'error')
           return
         }
         const { error } = await stripe.redirectToCheckout({ sessionId })
         if (error) {
           console.error(error)
-          alert('Redirection de paiement échouée.')
+          showMessage('Redirection de paiement échouée.', 'error')
         }
         return
       }
 
-      alert('Impossible d\'ouvrir la page de paiement. Veuillez réessayer.')
+      showMessage('Impossible d\'ouvrir la page de paiement. Veuillez réessayer.', 'error')
     } catch (e) {
       console.error(e)
-      alert('Erreur lors de la création de la réservation')
+      showMessage('Erreur lors de la création de la réservation', 'error')
     } finally {
       setSubmitting(false)
     }

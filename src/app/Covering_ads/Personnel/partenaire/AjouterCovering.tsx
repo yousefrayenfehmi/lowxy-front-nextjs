@@ -2,7 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createCoveringAd } from '../../../Api/AuthApi/CoveringApi'
+import { createCoveringAd, createCoveringCheckoutSession } from '../../../Api/AuthApi/CoveringApi'
+import { loadStripe } from '@stripe/stripe-js'
+import { useMessage } from '../../../contexts/MessageContext'
 
 interface CoveringAd {
   type_covering: 'partiel' | 'semi-total' | 'total'
@@ -42,6 +44,7 @@ const PRICING: Record<'berline' | 'van_suv', Record<'partiel' | 'semi-total' | '
 export default function AjouterCovering() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const { showMessage } = useMessage()
 
   const [formData, setFormData] = useState<CoveringAd>({
     type_covering: 'partiel',
@@ -58,28 +61,52 @@ export default function AjouterCovering() {
   const priceMois = PRICING[selectedVehicleKey][selectedCoveringKey].mois
   const totalEstime = priceJour * formData.nombre_jours * formData.nombre_taxi
 
-  // Mettre à jour le prix unitaire quand le type change
-  // (on stocke le prix/jour dans formData.prix pour l'API)
-  if (formData.prix !== priceJour) {
-    // Eviter une boucle: ne met à jour que si différent
-    setTimeout(() => {
-      setFormData(prev => ({ ...prev, prix: priceJour }))
-    }, 0)
-  }
+  // Le prix envoyé à l'API est toujours dérivé du type sélectionné
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      console.log('Covering ads créé:', formData)
-     const response = await createCoveringAd(formData)
-     console.log(response)
-      alert('Covering ads créé avec succès !')
-      router.push('/Covering_ads/Personnel/partenaire/mes-coverings')
+      // 1) Créer la session de paiement Stripe pour ce covering
+      const payload = {
+        details: {
+          type_covering: formData.type_covering,
+          modele_voiture: formData.type_voiture,
+          nombre_jour: formData.nombre_jours,
+          nombre_taxi: formData.nombre_taxi,
+          image: formData.lien_photo,
+          prix: priceJour*formData.nombre_jours*formData.nombre_taxi
+        }
+      }
+
+      const res = await createCoveringCheckoutSession(payload)
+
+      const redirectUrl = (res as any)?.url || (res as any)?.checkoutUrl || (res as any)?.data?.url
+      if (redirectUrl) {
+        window.location.href = redirectUrl as string
+        return
+      }
+
+      const sessionId = (res as any)?.id || (res as any)?.data?.id
+      if (sessionId) {
+        const stripe = await loadStripe('pk_test_51S3lkdQyRlRGZEmDT6UtTJeA3bhmi6nvTbjLG2tVfYqbm0HArsoQFDcxGxAHg4kLWFUJ16Pqwpnk2kPCPtWNIldL0090bGp5Ko')
+        if (!stripe) {
+          showMessage('Stripe non initialisé. Veuillez réessayer.', 'error')
+          return
+        }
+        const { error } = await stripe.redirectToCheckout({ sessionId })
+        if (error) {
+          console.error(error)
+          showMessage('Redirection de paiement échouée.', 'error')
+        }
+        return
+      }
+
+      showMessage('Impossible d\'ouvrir la page de paiement. Veuillez réessayer.', 'error')
     } catch (error) {
       console.error('Erreur lors de la création:', error)
-      alert('Erreur lors de la création')
+      showMessage('Erreur lors de l\'initialisation du paiement', 'error')
     } finally {
       setLoading(false)
     }

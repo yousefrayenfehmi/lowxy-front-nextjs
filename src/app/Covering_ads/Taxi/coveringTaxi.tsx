@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getAvailableCoverings, assignTaxiToCovering } from '../../Api/AuthApi/CoveringApi'
+import { useMessage } from '../../contexts/MessageContext'
 
 interface AvailableCovering {
   _id: string
@@ -37,6 +38,7 @@ const TYPES_VOITURE = {
 
 export default function CoveringTaxiPage() {
   const router = useRouter()
+  const { showMessage } = useMessage()
   const [loading, setLoading] = useState(true)
   const [assigningId, setAssigningId] = useState<string | null>(null)
   const [coverings, setCoverings] = useState<AvailableCovering[]>([])
@@ -66,11 +68,11 @@ export default function CoveringTaxiPage() {
     try {
       setAssigningId(campaignId)
       await assignTaxiToCovering(campaignId)
-      alert('Votre taxi a été assigné à la campagne avec succès !')
+      showMessage('Votre taxi a été assigné à la campagne avec succès !', 'success')
       await loadAvailable()
     } catch (e) {
       console.error(e)
-      alert("Erreur lors de l'assignation à la campagne.")
+      showMessage("Erreur lors de l'assignation à la campagne.", 'error')
     } finally {
       setAssigningId(null)
     }

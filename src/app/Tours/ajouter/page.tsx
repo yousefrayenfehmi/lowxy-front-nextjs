@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveTours } from '../../Api/AuthApi/ToursApi'
+import { useMessage } from '@/app/contexts/MessageContext'
 
 interface Jour {
   date: string
@@ -25,6 +26,7 @@ interface TourForm {
 
 export default function AjouterTourPage() {
   const router = useRouter()
+  const { showMessage } = useMessage()
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState<TourForm>({
     nom: '',
@@ -95,11 +97,11 @@ export default function AjouterTourPage() {
     setLoading(true)
     try {
       await saveTours(form)
-      alert('Tour créé avec succès')
+      showMessage('Tour créé avec succès', 'success')
       router.push('/Tours')
     } catch (e) {
       console.error(e)
-      alert('Erreur lors de la création du tour')
+      showMessage('Erreur lors de la création du tour', 'error')
     } finally {
       setLoading(false)
     }

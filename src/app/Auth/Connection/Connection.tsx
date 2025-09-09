@@ -2,10 +2,12 @@
 import React, { useEffect, useState } from "react";
 import ConnectionForm from "../../Form/Connection";
 import { useSearchParams } from "next/navigation";
+import { useMessage } from "../../contexts/MessageContext";
 export default function Connection() {
   const [accountType, setAccountType] = useState<'personnel' | 'chauffeur' | 'partenaire'>('personnel');
   const searchParams = useSearchParams();
   const type = searchParams.get('type');
+  const { showMessage } = useMessage();
   useEffect(() => {
     console.log('Type depuis URL:', type);
     
@@ -20,6 +22,14 @@ export default function Connection() {
       setAccountType('personnel');
     }
   }, [type]);
+
+  // Afficher un message si l'URL contient un indicateur d'échec de connexion
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error) {
+      showMessage('Échec de connexion. Vérifiez vos identifiants et réessayez.', 'error');
+    }
+  }, [searchParams, showMessage]);
 
   return (
     <main className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">

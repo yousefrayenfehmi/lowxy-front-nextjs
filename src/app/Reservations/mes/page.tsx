@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { cancelReservation, createReservationCheckoutSession, getMyReservations } from '../../Api/AuthApi/ToursApi'
 import { loadStripe } from '@stripe/stripe-js'
+import { useMessage } from '@/app/contexts/MessageContext'
 
 interface ReservationItem {
   _id: string
@@ -25,6 +26,7 @@ interface ReservationItem {
 
 export default function MesReservationsPage() {
   const router = useRouter()
+  const { showMessage } = useMessage()
   const [loading, setLoading] = useState(true)
   const [reservations, setReservations] = useState<ReservationItem[]>([])
   const [error, setError] = useState('')
@@ -99,7 +101,7 @@ export default function MesReservationsPage() {
         const stripe = await loadStripe('pk_test_51S3lkdQyRlRGZEmDT6UtTJeA3bhmi6nvTbjLG2tVfYqbm0HArsoQFDcxGxAHg4kLWFUJ16Pqwpnk2kPCPtWNIldL0090bGp5Ko')
         if (!stripe) {
           console.error('Stripe non initialisé')
-          alert('Stripe non initialisé. Veuillez réessayer.')
+          showMessage('Stripe non initialisé. Veuillez réessayer.', 'error')
           return
         }
         
@@ -107,11 +109,11 @@ export default function MesReservationsPage() {
         const { error } = await stripe.redirectToCheckout({ sessionId })
         if (error) {
           console.error('Erreur Stripe:', error)
-          alert(`Erreur de paiement: ${error.message || 'Redirection de paiement échouée.'}`)
+          showMessage(`Erreur de paiement: ${error.message || 'Redirection de paiement échouée.'}`, 'error')
         }
       } else {
         console.error('Aucun sessionId ou URL de redirection trouvé dans la réponse')
-        alert('Impossible d\'initialiser le paiement. Veuillez réessayer.')
+        showMessage('Impossible d\'initialiser le paiement. Veuillez réessayer.', 'error')
       }
     } catch (error) {
       console.error('Erreur lors de la redirection vers le paiement:', error)
@@ -130,7 +132,7 @@ export default function MesReservationsPage() {
       }
       
       setError(errorMessage)
-      alert(errorMessage)
+      showMessage(errorMessage, 'error')
     } finally {
       setActionLoading(null)
     }
