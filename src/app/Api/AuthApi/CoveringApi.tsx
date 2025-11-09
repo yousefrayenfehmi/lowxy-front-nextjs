@@ -1,11 +1,11 @@
 'use client'
 
 import axios from 'axios'
-
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export const createCoveringAd = async (data: any) => {
     const token = localStorage.getItem('token')
-    const response = await axios.post('/api/save', data, {
+    const response = await axios.post(`${apiUrl}/save`, data, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -16,7 +16,7 @@ export const createCoveringAd = async (data: any) => {
 // Stripe - créer une session de paiement pour une campagne de covering
 export const createCoveringCheckoutSession = async (data: any) => {
     const token = localStorage.getItem('token')
-    const response = await axios.post('/api/create', data, {
+    const response = await axios.post(`${apiUrl}/create`, data, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -27,7 +27,7 @@ export const createCoveringCheckoutSession = async (data: any) => {
 // Stripe - confirmer le paiement (si un flux de confirmation est nécessaire)
 export const confirmCoveringPayment = async (data: any) => {
     const token = localStorage.getItem('token')
-    const response = await axios.post('/api/campaigns/confirm-payment', data, {
+    const response = await axios.post(`${apiUrl}/campaigns/confirm-payment`, data, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -37,7 +37,7 @@ export const confirmCoveringPayment = async (data: any) => {
 
 export const getUserCoverings = async () => {
     const token = localStorage.getItem('token')
-    const response = await axios.get('/api/creator-campaigns', {
+    const response = await axios.get(`${apiUrl}/creator-campaigns`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -48,7 +48,7 @@ export const getUserCoverings = async () => {
 // Campagnes disponibles pour les chauffeurs
 export const getAvailableCoverings = async () => {
     const token = localStorage.getItem('token')
-    const response = await axios.get('/api/available', {
+    const response = await axios.get(`${apiUrl}/available`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -59,7 +59,7 @@ export const getAvailableCoverings = async () => {
 // Assigner le taxi connecté à une campagne
 export const assignTaxiToCovering = async (coveringId: string) => {
     const token = localStorage.getItem('token')
-    const response = await axios.post(`/api/join/${coveringId}`, {}, {
+    const response = await axios.post(`${apiUrl}/join/${coveringId}`, {}, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -70,7 +70,7 @@ export const assignTaxiToCovering = async (coveringId: string) => {
 // Campagnes déjà assignées au taxi connecté
 export const getAssignedCoverings = async () => {
     const token = localStorage.getItem('token')
-    const response = await axios.get('/api/my-campaigns', {
+    const response = await axios.get(`${apiUrl}/my-campaigns`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }

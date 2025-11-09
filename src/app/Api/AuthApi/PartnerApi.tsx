@@ -1,11 +1,11 @@
 'use client';
 import axios from "axios";
-
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 export  async function PartnerApi(data: any) {
     try {
         console.log(data);
         
-        const response = await axios.post('/api/partenaire/register', data);
+        const response = await axios.post(`${apiUrl}/partenaire/register`, data);
         return response.data;
     } catch (error) {
         console.error('Erreur lors de l\'inscription partenaire:', error);
@@ -14,7 +14,7 @@ export  async function PartnerApi(data: any) {
 }
 
 export async function modifierProfilePartenaire(profileData: any) {
-    const response = await axios.post('/api/completerpartenaire', profileData, {
+    const response = await axios.post(`${apiUrl}/completerpartenaire`, profileData, {
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('tokenpartenaire')}`
         }
@@ -22,7 +22,7 @@ export async function modifierProfilePartenaire(profileData: any) {
     return response.data
 }   
 export async function recupererProfilePartenaire() {
-    const response = await axios.get('/api/partenaire-by-token', {
+    const response = await axios.get(`${apiUrl}/partenaire-by-token`, {
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('tokenpartenaire')}`
         }

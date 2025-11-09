@@ -1,10 +1,10 @@
 'use client'
 
 import axios from 'axios'
-
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 export async function saveTours(tour: any) {
   const token = localStorage.getItem('token')
-  const response = await axios.post('/api/tours', tour, {
+  const response = await axios.post(`${apiUrl}/tours`, tour, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -14,7 +14,7 @@ export async function saveTours(tour: any) {
 
 export async function getMyTours() {
   const token = localStorage.getItem('token')
-  const response = await axios.get('/api/mes-tours', {
+  const response = await axios.get(`${apiUrl}/mes-tours`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -26,14 +26,14 @@ export async function getAllTours(ville: string) {
   const token = localStorage.getItem('token')
   const headers: Record<string, string> = {}
   if (token) headers['Authorization'] = `Bearer ${token}`
-  const response = await axios.get(`/api/tours/ville/${ville}`, { headers })
+  const response = await axios.get(`${apiUrl}/tours/ville/${ville}`, { headers })
   return response.data
 }
 
 export async function getTourById(id: string) {
   console.log(id)
   const token = localStorage.getItem('token')
-  const response = await axios.get(`/api/tours/${id}`, {
+  const response = await axios.get(`${apiUrl}/tours/${id}`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -43,7 +43,7 @@ export async function getTourById(id: string) {
 
 export async function createTourReservation(tourId: string, reservation: any) {
   const token = localStorage.getItem('token')
-  const response = await axios.post(`/api/tours/${tourId}/reservations`, reservation, {
+  const response = await axios.post(`${apiUrl}/tours/${tourId}/reservations`, reservation, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -53,7 +53,7 @@ export async function createTourReservation(tourId: string, reservation: any) {
 
 export async function createTourCheckoutSession(tourId: string, reservation: any) {
   const token = localStorage.getItem('token')
-  const response = await axios.post(`/api/reservations/create-payment-session`, reservation, {
+  const response = await axios.post(`${apiUrl}/reservations/create-payment-session`, reservation, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -63,7 +63,7 @@ export async function createTourCheckoutSession(tourId: string, reservation: any
 
 export async function getMyReservations() {
   const token = localStorage.getItem('token')
-  const response = await axios.get('/api/mes-reservations', {
+  const response = await axios.get(`${apiUrl}/mes-reservations`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -77,7 +77,7 @@ export async function createReservationCheckoutSession(data: {
   jour_info?: any
 }) {
   const token = localStorage.getItem('token')
-  const response = await axios.post(`/api/reservations/complete-reservation`, data, {
+  const response = await axios.post(`${apiUrl}/reservations/complete-reservation`, data, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -91,7 +91,7 @@ export async function cancelReservation(data: {
   jourId: string
 }) {
   const token = localStorage.getItem('token')
-  const response = await axios.post(`/api/reservations/annuler-reservation-touriste`, data, {
+  const response = await axios.post(`${apiUrl}/reservations/annuler-reservation-touriste`, data, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -107,7 +107,7 @@ export async function confirmPayment(data: {
   payment_id?: string
 }) {
   const token = localStorage.getItem('token')
-  const response = await axios.post('/api/reservations/confirm-payment', data, {
+  const response = await axios.post(`${apiUrl}/reservations/confirm-payment`, data, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
