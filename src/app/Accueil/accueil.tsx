@@ -1,161 +1,335 @@
 "use client";
-import React from "react";
-import { useRouter } from 'next/navigation'
+import React, { useRef } from "react";
+import { useRouter } from 'next/navigation';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
 
-const steps = [
-  { 
-    label: "Quizz", 
-    title: "Quizz géolocaliser",
-    subtitle: "Gagne ta course en répondant à temps",
-    color: "bg-gradient-to-b from-pink-400 to-pink-500",
-    href: '/quizz',
-    icon: <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
-      <rect x="6" y="8" width="24" height="20" rx="4" fill="#fff" stroke="#ec4899" strokeWidth="2"/>
-      <circle cx="18" cy="15" r="3" fill="#ec4899"/>
-      <rect x="16" y="20" width="4" height="6" rx="2" fill="#ec4899"/>
-      <rect x="26" y="6" width="6" height="2" rx="1" fill="#fbbf24"/>
-    </svg>
+gsap.registerPlugin(ScrollTrigger);
+
+// Data for the "Path"
+const units = [
+  {
+    id: 1,
+    title: "Découverte",
+    description: "Commence ton aventure",
+    color: "bg-pink-500", // Header color (Quizz theme)
+    nodes: [
+      {
+        id: 'quizz',
+        href: '/quizz',
+        label: 'Quizz',
+        status: 'current',
+        color: 'bg-pink-500',
+        borderColor: 'border-pink-600',
+        textColor: 'text-pink-500'
+      },
+      {
+        id: 'blog',
+        href: '/blog',
+        label: 'Blog',
+        status: 'current',
+        color: 'bg-blue-500',
+        borderColor: 'border-blue-600',
+        textColor: 'text-blue-500'
+      },
+      {
+        id: 'chest1',
+        href: '#',
+        label: 'Récompense',
+        status: 'locked',
+        color: 'bg-yellow-500',
+        borderColor: 'border-yellow-600',
+        textColor: 'text-yellow-500'
+      },
+    ]
   },
-  { 
-    label: "Blog de ville", 
-    title: "Blog de la ville",
-    subtitle: "Découvre les dessous de ta ville",
-    color: "bg-gradient-to-b from-blue-400 to-blue-500",
-    href: '/blog',
-    icon: <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
-      <rect x="8" y="6" width="20" height="24" rx="3" fill="#fff" stroke="#3b82f6" strokeWidth="2"/>
-      <rect x="11" y="10" width="14" height="2" rx="1" fill="#3b82f6"/>
-      <rect x="11" y="14" width="10" height="1.5" rx="0.75" fill="#60a5fa"/>
-      <rect x="11" y="17" width="12" height="1.5" rx="0.75" fill="#60a5fa"/>
-      <rect x="11" y="20" width="8" height="1.5" rx="0.75" fill="#93c5fd"/>
-      <rect x="11" y="23" width="6" height="1.5" rx="0.75" fill="#93c5fd"/>
-      <rect x="4" y="8" width="8" height="8" rx="2" fill="#10b981"/>
-      <polygon points="8,10 10,12 8,14" fill="#fff"/>
-    </svg>
+  {
+    id: 2,
+    title: "Services",
+    description: "Profite de la ville",
+    color: "bg-green-500", // Header color (Tickets theme)
+    nodes: [
+      {
+        id: 'tours',
+        href: '/Tours',
+        label: 'Billetteries',
+        status: 'current',
+        color: 'bg-green-500',
+        borderColor: 'border-green-600',
+        textColor: 'text-green-500',
+        bubbleText: "La on met des des phrase pour expliquer Lapp"
+      },
+      {
+        id: 'guide',
+        href: '/docs',
+        label: 'Guide AI',
+        status: 'current',
+        color: 'bg-yellow-500',
+        borderColor: 'border-yellow-600',
+        textColor: 'text-yellow-500',
+        bubbleText: "Pour que le regarde reste et et scroll toute en bas"
+      },
+    ]
   },
-  { 
-    label: "Billetteries", 
-    title: "Billetteries & Tours",
-    subtitle: "Meilleur attractions au meilleur prix",
-    color: "bg-gradient-to-b from-green-400 to-green-500",
-    href: '/Tours',
-    icon: <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
-      <rect x="6" y="12" width="24" height="12" rx="3" fill="#fff" stroke="#22c55e" strokeWidth="2"/>
-      <rect x="9" y="15" width="18" height="6" rx="2" fill="#dcfce7"/>
-      <rect x="12" y="17" width="12" height="2" rx="1" fill="#22c55e"/>
-      <circle cx="18" cy="18" r="1.5" fill="#16a34a"/>
-      <rect x="3" y="16" width="3" height="4" rx="1.5" fill="#22c55e"/>
-      <rect x="30" y="16" width="3" height="4" rx="1.5" fill="#22c55e"/>
-      <rect x="14" y="10" width="8" height="2" rx="1" fill="#fbbf24"/>
-    </svg>
-  },
-  { 
-    label: "Guide AI", 
-    title: "La guide touristique",
-    subtitle: "Prépare tes trajet avec ce guide IA",
-    color: "bg-gradient-to-b from-yellow-400 to-yellow-500",
-    href: '/docs',
-    icon: <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
-      <rect x="10" y="8" width="16" height="20" rx="8" fill="#fff" stroke="#eab308" strokeWidth="2"/>
-      <rect x="12" y="12" width="12" height="8" rx="4" fill="#fef3c7"/>
-      <circle cx="15" cy="16" r="1.5" fill="#eab308"/>
-      <circle cx="21" cy="16" r="1.5" fill="#eab308"/>
-      <rect x="16" y="20" width="4" height="1" rx="0.5" fill="#eab308"/>
-      <rect x="14" y="24" width="8" height="2" rx="1" fill="#ca8a04"/>
-      <circle cx="10" cy="8" r="3" fill="#10b981"/>
-      <circle cx="26" cy="8" r="3" fill="#10b981"/>
-      <rect x="6" y="14" width="6" height="8" rx="3" fill="#3b82f6"/>
-      <rect x="24" y="14" width="6" height="8" rx="3" fill="#3b82f6"/>
-    </svg>
-  },
-  { 
-    label: "Covering Ads", 
-    title: "La plus grande des petites annonces",
-    subtitle: "A votre tour d'afficher",
-    color: "bg-gradient-to-b from-purple-400 to-purple-500",
-    href: '/Covering_ads/Personnel/partenaire',
-    icon: <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
-      <rect x="6" y="10" width="18" height="16" rx="3" fill="#fff" stroke="#a855f7" strokeWidth="2"/>
-      <rect x="9" y="13" width="12" height="10" rx="2" fill="#f3e8ff"/>
-      <rect x="11" y="16" width="8" height="2" rx="1" fill="#a855f7"/>
-      <rect x="11" y="19" width="6" height="1.5" rx="0.75" fill="#c084fc"/>
-      <circle cx="26" cy="18" r="6" fill="#a855f7"/>
-      <polygon points="24,16 28,18 24,20" fill="#fff"/>
-      <circle cx="29" cy="15" r="1.5" fill="#fbbf24"/>
-      <circle cx="29" cy="21" r="1.5" fill="#fbbf24"/>
-      <circle cx="32" cy="18" r="1.5" fill="#fbbf24"/>
-    </svg>
-  },
+  {
+    id: 3,
+    title: "Partenaires",
+    description: "Les bons plans",
+    color: "bg-purple-500", // Header color (Ads theme)
+    nodes: [
+      {
+        id: 'ads',
+        href: '/Covering_ads/Personnel/partenaire',
+        label: 'Annonces',
+        status: 'current',
+        color: 'bg-purple-500',
+        borderColor: 'border-purple-600',
+        textColor: 'text-purple-500'
+      },
+      {
+        id: 'chest2',
+        href: '#',
+        label: 'Bonus',
+        status: 'locked',
+        color: 'bg-orange-500',
+        borderColor: 'border-orange-600',
+        textColor: 'text-orange-500'
+      },
+    ]
+  }
 ];
 
-// URLs SVG/PNG libres de droits pour les drapeaux européens
-const flagImages = [
-  { src: "https://upload.wikimedia.org/wikipedia/en/c/c3/Flag_of_France.svg", style: { top: "10%", left: "15%", width: 48 } },
-  { src: "https://upload.wikimedia.org/wikipedia/en/9/9a/Flag_of_Spain.svg", style: { top: "30%", left: "70%", width: 44 } },
-  { src: "https://upload.wikimedia.org/wikipedia/en/0/03/Flag_of_Italy.svg", style: { top: "60%", left: "20%", width: 44 } },
-  { src: "https://upload.wikimedia.org/wikipedia/en/b/ba/Flag_of_Germany.svg", style: { top: "15%", left: "40%", width: 44 } },
-  { src: "https://upload.wikimedia.org/wikipedia/en/a/ae/Flag_of_the_United_Kingdom.svg", style: { top: "40%", left: "60%", width: 44 } },
-  { src: "https://upload.wikimedia.org/wikipedia/commons/5/5c/Flag_of_Portugal.svg", style: { top: "70%", left: "10%", width: 40 } },
-  { src: "https://upload.wikimedia.org/wikipedia/commons/2/20/Flag_of_the_Netherlands.svg", style: { top: "80%", left: "50%", width: 40 } },
-  { src: "https://upload.wikimedia.org/wikipedia/commons/6/65/Flag_of_Belgium.svg", style: { top: "25%", left: "80%", width: 36 } },
-  { src: "https://upload.wikimedia.org/wikipedia/commons/5/5c/Flag_of_Greece.svg", style: { top: "55%", left: "75%", width: 38 } },
-  { src: "https://upload.wikimedia.org/wikipedia/en/4/4c/Flag_of_Sweden.svg", style: { top: "65%", left: "35%", width: 36 } },
-];
-
-
+// Icons components
+const Icons = {
+  Book: () => (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+    </svg>
+  ),
+  // Keep SVGs for flags we didn't generate 3D versions for, or as fallbacks
+  FlagUk: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg width="40" height="40" viewBox="0 0 32 24" className="shadow-sm" {...props}>
+      <rect width="32" height="24" fill="#00247d" />
+      <path d="M0,0 L32,24 M32,0 L0,24" stroke="#fff" strokeWidth="4" />
+      <path d="M0,0 L32,24 M32,0 L0,24" stroke="#cf142b" strokeWidth="2" />
+      <path d="M16,0 V24 M0,12 H32" stroke="#fff" strokeWidth="6" />
+      <path d="M16,0 V24 M0,12 H32" stroke="#cf142b" strokeWidth="3" />
+    </svg>
+  ),
+  FlagIt: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg width="40" height="40" viewBox="0 0 32 24" className="shadow-sm" {...props}>
+      <rect width="32" height="24" fill="#CE2B37" />
+      <rect width="21.3" height="24" fill="#fff" />
+      <rect width="10.6" height="24" fill="#009246" />
+    </svg>
+  ),
+  FlagJp: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg width="40" height="40" viewBox="0 0 32 24" className="shadow-sm" {...props}>
+      <rect width="32" height="24" fill="#fff" />
+      <circle cx="16" cy="12" r="8" fill="#BC002D" />
+    </svg>
+  )
+};
 
 export default function Accueil() {
-  const router = useRouter()
+  const router = useRouter();
+  const mainRef = useRef<HTMLElement>(null);
+
+  useGSAP(() => {
+    const main = mainRef.current;
+    if (!main) return;
+
+    // Spin the path nodes on scroll
+    gsap.utils.toArray<HTMLElement>('.path-node-button').forEach((btn) => {
+      gsap.to(btn, {
+        rotation: 360,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: main, // Use main container as trigger reference
+          scroller: main, // Important: tell ScrollTrigger we are scrolling inside 'main'
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 1,
+        }
+      });
+    });
+
+    // Parallax/Rotate decorations
+    gsap.utils.toArray<HTMLElement>('.decoration-item').forEach((item, i) => {
+      const speed = (i + 1) * 0.5;
+      gsap.to(item, {
+        y: -50 * speed,
+        rotation: i % 2 === 0 ? 45 : -45,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: main,
+          scroller: main,
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 1,
+        }
+      });
+    });
+
+  }, { scope: mainRef });
+
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-center bg-white overflow-hidden pt-16">
-      {/* Drapeaux européens en SVG/PNG colorés */}
-      {flagImages.map((item, idx) => (
-        <img
-          key={idx}
-          src={item.src}
-          alt="drapeau européen"
-          style={{
-            position: "absolute",
-            opacity: 0.75,
-            pointerEvents: "none",
-            zIndex: 0,
-            filter: "drop-shadow(0 6px 16px rgba(167, 139, 250, 0.8)) drop-shadow(0 0 25px rgba(251, 191, 36, 0.6)) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3)) brightness(1.1) contrast(1.15)",
-            transform: "scale(1.1)",
-            ...item.style,
-          }}
-        />
-      ))}
-      {/* Emojis de monuments historiques */}
-      
-      {/* Boutons au centre vertical de la page */}
-      <div className="relative z-10 flex flex-col gap-10 items-center justify-center min-h-screen py-12">
-        {steps.map((step, idx) => (
-          <div key={idx} className="flex flex-col items-center">
-            {/* Bouton avec texte seulement */}
-            <button
-              className={`w-80 h-28 rounded-2xl flex items-center justify-center ${step.color} transition-all duration-300 hover:scale-105 hover:shadow-2xl backdrop-blur-sm`}
-              style={{ 
-                boxShadow: '0 8px 0 0 rgba(0,0,0,0.15), 0 12px 24px 0 rgba(0,0,0,0.12), inset 0 1px 0 0 rgba(255,255,255,0.3)',
-                border: '3px solid rgba(255,255,255,0.4)',
-                background: `linear-gradient(135deg, ${step.color.includes('pink') ? 'rgba(244,114,182,0.9), rgba(236,72,153,0.95)' : step.color.includes('blue') ? 'rgba(96,165,250,0.9), rgba(59,130,246,0.95)' : step.color.includes('green') ? 'rgba(74,222,128,0.9), rgba(34,197,94,0.95)' : step.color.includes('yellow') ? 'rgba(251,191,36,0.9), rgba(245,158,11,0.95)' : 'rgba(167,139,250,0.9), rgba(139,92,246,0.95)'})`,
-                paddingLeft: '5px',
-                paddingRight: '5px'
-              }}
-              onClick={() => step.href && router.push(step.href)}
-            >
-              {/* Texte centré avec espacement exact */}
-              <div className="flex flex-col items-center justify-center text-center w-full">
-               <h3 className="text-white font-bold text-lg mb-2 tracking-wide drop-shadow-lg leading-tight break-words mt-4">
-                  {step.title.toUpperCase()}
-                </h3>
-                <h4 className="text-white/90 text-sm font-medium leading-tight break-words mt-1">
-                  {step.subtitle.toUpperCase()}
-                </h4>
+    <div className="min-h-screen bg-white flex flex-col pb-20 font-sans">
+      {/* Top Bar */}
+      <header className="sticky top-0 z-50 bg-white border-b-2 border-gray-200 px-4 py-3 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          {/* Flag placeholder */}
+          <div className="w-8 h-6 rounded overflow-hidden border border-gray-200 relative hover:scale-110 transition-transform cursor-pointer">
+            <img src="https://upload.wikimedia.org/wikipedia/en/c/c3/Flag_of_France.svg" className="w-full h-full object-cover" alt="Langue" />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.push('/Auth/Connection')}
+            className="px-4 py-2 font-bold text-blue-500 border-2 border-blue-200 rounded-xl hover:bg-blue-50 transition-colors uppercase tracking-wide text-sm"
+          >
+            Connexion
+          </button>
+          <button
+            onClick={() => router.push('/Auth/Inscription')}
+            className="px-4 py-2 font-bold text-white bg-blue-500 border-b-4 border-blue-600 rounded-xl hover:bg-blue-400 active:border-b-0 active:translate-y-1 transition-all uppercase tracking-wide text-sm"
+          >
+            Inscription
+          </button>
+        </div>
+      </header>
+
+      {/* Main Content - The Path */}
+      <main
+        ref={mainRef}
+        className="flex-1 flex flex-col items-center py-8 px-4 overflow-y-auto relative"
+      >
+        {units.map((unit, unitIndex) => (
+          <div key={unit.id} className="w-full max-w-md mb-8 relative">
+
+            {/* Decorative Elements (3D Monuments/Flags) */}
+            {unitIndex === 0 && (
+              <>
+                <div className="decoration-item absolute -left-20 top-10 opacity-90 pointer-events-none z-0">
+                  <img src="/assets/eiffel_tower_3d.png" alt="Eiffel Tower" className="w-24 h-24 object-contain drop-shadow-xl" />
+                </div>
+                <div className="decoration-item absolute -right-12 top-0 opacity-90 pointer-events-none z-0">
+                  <img src="/assets/france_flag_3d.png" alt="France Flag" className="w-16 h-16 object-contain drop-shadow-lg" />
+                </div>
+                <div className="decoration-item absolute left-10 -bottom-16 opacity-90 pointer-events-none z-0">
+                  <img src="/assets/usa_flag_3d.png" alt="USA Flag" className="w-16 h-16 object-contain drop-shadow-lg" />
+                </div>
+              </>
+            )}
+            {unitIndex === 1 && (
+              <>
+                <div className="decoration-item absolute -right-20 top-32 opacity-90 pointer-events-none z-0">
+                  <img src="/assets/colosseum_3d.png" alt="Colosseum" className="w-24 h-24 object-contain drop-shadow-xl" />
+                </div>
+                <div className="decoration-item absolute -left-12 top-24 opacity-80 pointer-events-none z-0">
+                  <Icons.FlagIt width={48} height={36} className="drop-shadow-md" />
+                </div>
+                <div className="decoration-item absolute right-16 -top-10 opacity-90 pointer-events-none z-0">
+                  <img src="/assets/big_ben_3d.png" alt="Big Ben" className="w-20 h-20 object-contain drop-shadow-xl" />
+                </div>
+              </>
+            )}
+            {unitIndex === 2 && (
+              <>
+                <div className="decoration-item absolute -left-16 top-0 opacity-90 pointer-events-none z-0">
+                  <img src="/assets/torii_gate_3d.png" alt="Torii Gate" className="w-24 h-24 object-contain drop-shadow-xl" />
+                </div>
+                <div className="decoration-item absolute -right-10 top-16 opacity-80 pointer-events-none z-0">
+                  <Icons.FlagJp width={48} height={36} className="drop-shadow-md" />
+                </div>
+                <div className="decoration-item absolute left-16 bottom-0 opacity-80 pointer-events-none z-0">
+                  <Icons.FlagUk width={48} height={36} className="drop-shadow-md" />
+                </div>
+              </>
+            )}
+
+            {/* Unit Header */}
+            <div className={`${unit.color} rounded-2xl p-4 mb-8 flex justify-between items-center shadow-lg transform transition-transform hover:scale-[1.02] z-10 relative`}>
+              <div className="text-white">
+                <h2 className="font-bold text-xl tracking-wide">{unit.title}</h2>
+                <p className="text-sm opacity-90 font-medium">{unit.description}</p>
               </div>
-            </button>
+              <div className="bg-white/20 p-2 rounded-xl">
+                <Icons.Book />
+              </div>
+            </div>
+
+            {/* Path Nodes */}
+            <div className="flex flex-col items-center gap-6 relative z-10">
+              {unit.nodes.map((node, idx) => {
+                // Calculate zigzag offset
+                const offset = idx % 2 === 0 ? 'translate-x-0' : (idx % 4 === 1 ? '-translate-x-12' : 'translate-x-12');
+
+                const isLocked = node.status === 'locked';
+                const bgColor = isLocked ? 'bg-gray-200' : node.color; // Use node specific color
+                const borderColor = isLocked ? 'border-gray-300' : node.borderColor; // Use node specific border
+
+                return (
+                  <div key={node.id} className={`relative ${offset} group`}>
+                    {/* Decorative dots */}
+                    {!isLocked && (
+                      <>
+                        <div className="absolute -top-4 -left-4 w-3 h-3 bg-yellow-400 rounded-full opacity-60 animate-pulse"></div>
+                        <div className="absolute top-0 -right-6 w-2 h-2 bg-green-400 rounded-full opacity-60 delay-100"></div>
+                        <div className="absolute -bottom-2 left-10 w-2 h-2 bg-purple-400 rounded-full opacity-60 delay-300"></div>
+                      </>
+                    )}
+
+                    <button
+                      onClick={() => !isLocked && router.push(node.href)}
+                      disabled={isLocked}
+                      className={`
+                        path-node-button
+                        w-16 h-16 rounded-full flex items-center justify-center 
+                        ${bgColor} ${borderColor} border-b-[6px] active:border-b-0 active:translate-y-[6px]
+                        transition-all duration-150 z-10 relative
+                        ${isLocked ? 'cursor-not-allowed text-gray-400' : 'cursor-pointer shadow-xl hover:brightness-110'}
+                      `}
+                    >
+                      {/* Inner white bar */}
+                      <div className="w-6 h-3 bg-white/20 rounded-full"></div>
+
+                      {!isLocked && (
+                        <div className="absolute -top-2 -right-2">
+                          <div className="w-4 h-4 bg-yellow-400 rounded-full animate-pulse"></div>
+                        </div>
+                      )}
+                    </button>
+
+                    {/* Descriptive Bubble (Permanent if bubbleText exists) */}
+                    {/* @ts-ignore */}
+                    {node.bubbleText && (
+                      <div className="absolute top-1/2 left-20 -translate-y-1/2 bg-white border-2 border-gray-200 px-4 py-3 rounded-2xl shadow-md w-48 z-20">
+                        {/* @ts-ignore */}
+                        <p className="text-gray-700 text-sm font-medium leading-tight">{node.bubbleText}</p>
+                        {/* Triangle pointer */}
+                        <div className="absolute top-1/2 -left-2 -translate-y-1/2 w-4 h-4 bg-white border-l-2 border-b-2 border-gray-200 rotate-45"></div>
+                      </div>
+                    )}
+
+                    {/* Hover Label (Only if no bubbleText, to avoid clutter) */}
+                    {/* @ts-ignore */}
+                    {!isLocked && !node.bubbleText && (
+                      <div className="absolute top-2 left-20 bg-white border-2 border-gray-200 px-3 py-2 rounded-xl shadow-sm whitespace-nowrap z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                        <span className={`font-bold text-sm ${node.textColor}`}>{node.label}</span>
+                        <div className="absolute top-1/2 -left-1.5 -translate-y-1/2 w-3 h-3 bg-white border-l-2 border-b-2 border-gray-200 rotate-45"></div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         ))}
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
